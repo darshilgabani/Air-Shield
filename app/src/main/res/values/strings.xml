@@ -1,0 +1,93 @@
+<resources>
+    <string name="app_name">Air Shield</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="login">Login</string>
+    <string name="title">title</string>
+    <string name="don_t_have_an_account_sign_up">Don’t have an account? Sign Up</string>
+    <string name="already_have_an_account_login">Already Have an Account. Login</string>
+
+
+
+    <string name="aqi_title">AQI</string>
+    <string name="temperature_unit_celsius">%1$.1f &#176;C</string>
+    <string name="temperature_unit_fahrenheit">%1$.1f &#176;F</string>
+    <string name="celsiusSymbol">&#176;C</string>
+    <string name="fahrenheitSymbol">&#176;F</string>
+    <string name="humidity_unit">%1$.0f%%</string>
+    <string name="pressure_unit">%1$.1f mb</string>
+    <string name="wind_unit_mps">%1$.2f m/s</string>
+    <string name="wind_unit_kmph">%1$.2f km/h</string>
+    <string name="mps">m/s</string>
+    <string name="kmph">km/h</string>
+
+    <string name="alert_title_gps_off">GPS is Turned Off</string>
+    <string name="alert_content_gps_off">Please turn on GPS for more accurate data.</string>
+    <string name="alert_title_location_access">Allow Location Access</string>
+    <string name="alert_content_location_access">Please Allow Location Access to get Air Quality and Weather Information.</string>
+
+    <string name="place_holder">---</string>
+    <string name="pressure">Air Pressure</string>
+    <string name="humidity">Humidity</string>
+    <string name="wind">Wind Speed</string>
+    <string name="attribution">Attributions</string>
+    <string name="pollutants_aqi">Pollutants AQI</string>
+
+    <!--AQI Scale-->
+    <string name="good">Good</string>
+    <string name="moderate">Moderate</string>
+    <string name="unhealthy_for_sensitive">Unhealthy for Sensitive Group</string>
+    <string name="unhealthy">Unhealthy</string>
+    <string name="very_unhealthy">Very Unhealthy</string>
+    <string name="hazardous">Hazardous</string>
+
+    <!--AQI Range-->
+    <string name="good_range">0 – 50</string>
+    <string name="moderate_range">51 – 100</string>
+    <string name="unhealthy_for_sensitive_range">101 – 150</string>
+    <string name="unhealthy_range">151 – 200</string>
+    <string name="very_unhealthy_range">201 – 300</string>
+    <string name="hazardous_range">300+</string>
+
+    <!--Health Implications-->
+    <string name="good_health_implications">Air quality is considered satisfactory, and air pollution poses little or no risk.</string>
+    <string name="moderate_health_implications">Air quality is acceptable; however, for some pollutants there may be a moderate health concern for a very small number of people who are unusually sensitive to air pollution.</string>
+    <string name="unhealthy_for_sensitive_health_implications">Members of sensitive groups may experience health effects. The general public is not likely to be affected.</string>
+    <string name="unhealthy_health_implications">Everyone may begin to experience health effects; members of sensitive groups may experience more serious health effects.</string>
+    <string name="very_unhealthy_health_implications">Health warnings of emergency conditions. The entire population is more likely to be affected.</string>
+    <string name="hazardous_health_implications">Health alert: everyone may experience more serious health effects.</string>
+
+    <!--Cautionary Statements -->
+    <string name="goodCaution">No significant health concerns. Enjoy your day!</string>
+    <string name="moderateCaution">Active children and adults, and people with respiratory disease, such as asthma, should limit prolonged outdoor exertion.</string>
+    <string name="unhealthySensitiveCaution">Active children and adults, and people with respiratory disease, such as asthma, should limit prolonged outdoor exertion.</string>
+    <string name="unhealthyCaution">Active children and adults, and people with respiratory disease, such as asthma, should avoid prolonged outdoor exertion; everyone else, especially children, should limit prolonged outdoor exertion</string>
+    <string name="veryUnhealthyCaution">Active children and adults, and people with respiratory disease, such as asthma, should avoid all outdoor exertion; everyone else, especially children, should limit outdoor exertion.</string>
+    <string name="hazardousCaution">Everyone should avoid all outdoor exertion</string>
+
+    <string name="appwidget_text">AQI</string>
+    <string name="add_widget">Add widget</string>
+
+    <string name="shareText">Hey, Check the Air Quality in your area with this app: https://pollutionmonitor.page.link/RtQw</string>
+
+    <!--Rate Us Card-->
+    <string name="rateUsTitle">Would you like to rate us on Play Store?</string>
+    <string name="rateUsDesc">Ratings will help us continue improving this app and adding new features.</string>
+    <string name="rateUsYes">Sure</string>
+    <string name="rateUsNo">No Thanks.</string>
+
+    <!--Bottom Navigation-->
+    <string name="bottomNavAQI">AQI</string>
+    <string name="bottomNavSearch">Search</string>
+    <string name="bottomNavSettings">Settings</string>
+
+    <!--Settings-->
+    <string name="windSpeed">Wind speed</string>
+    <string name="temperature">Temperature</string>
+    <string name="shareApp">Share App</string>
+    <string name="feedback">Send Feedback</string>
+    <string name="appVersion">App Version: %1$s</string>
+
+    <!--Miscellaneous-->
+    <string name="locationDisclaimer">Please note: This is the location of your nearest air pollution monitoring station</string>
+    <string name="register">Register</string>
+</resources>

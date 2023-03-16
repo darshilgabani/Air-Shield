@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:paddingBottom="20dp"
+    android:paddingHorizontal="20dp"
+    android:background="@drawable/bg_gradient"
+    android:orientation="vertical"
+    tools:context=".activity.LandingPageActivity">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/logo"
+        android:layout_width="@dimen/_200sdp"
+        android:layout_height="@dimen/_200sdp"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="@dimen/_50sdp"
+        android:src="@drawable/colorful_sound_waves_music_app_logo"
+        android:textColor="@color/yellow"
+        android:textSize="@dimen/_40sdp"
+        android:textStyle="italic" />
+
+
+
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnSignUp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_50sdp"
+        android:background="@drawable/rectangle_green"
+        android:layout_below="@id/logo"
+        android:textColor="@color/white"
+        android:layout_marginBottom="20dp"
+        android:text="@string/sign_up" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnSignUp"
+
+        android:background="@drawable/rectangle_border"
+        android:text="@string/login"
+        android:textColor="@color/black" />
+
+</RelativeLayout>

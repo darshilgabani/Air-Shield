@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient"
+    android:paddingHorizontal="@dimen/_20sdp"
+    tools:context=".activity.SignUpActivity">
+
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:overScrollMode="never"
+     >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Create a  New Account"
+                android:layout_marginTop="@dimen/_40sdp"
+                android:layout_marginBottom="@dimen/_10sdp"
+                android:layout_gravity="center"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_15sdp" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/edtFirstName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_5sdp"
+                android:background="@drawable/rectangle"
+                android:hint="First Name"
+                android:text=""
+                android:inputType="textCapSentences"
+                android:padding="@dimen/_10sdp"
+                android:textColor="@color/hintGrayColor"
+                android:textColorHint="@color/hintGrayColor"
+                android:textSize="14sp"
+                android:windowSoftInputMode="stateVisible" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/edtLastName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:hint="Last Name"
+                android:text=""
+                android:inputType="textCapSentences"
+                android:background="@drawable/rectangle"
+                android:padding="@dimen/_10sdp"
+                android:textColor="@color/hintGrayColor"
+                android:textColorHint="@color/hintGrayColor"
+                android:textSize="14sp"
+                android:windowSoftInputMode="stateVisible" />
+
+
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/edtEmailAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:background="@drawable/rectangle"
+                android:hint="Email Address"
+                android:text=""
+                android:inputType="textEmailAddress"
+                android:padding="@dimen/_10sdp"
+                android:textColor="@color/hintGrayColor"
+                android:textColorHint="@color/hintGrayColor"
+                android:textSize="14sp"
+                android:windowSoftInputMode="stateVisible" />
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/txtInputPassword"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:background="@drawable/rectangle"
+                app:passwordToggleEnabled="true"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                >
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtTextPassRegister"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/rectangle"
+                    android:inputType="textPassword"
+                    android:textColor="@color/hintGrayColor"
+                    android:text=""
+                    android:textColorHint="@color/hintGrayColor"
+                    android:hint="Password"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/txtConfirmInputPassword"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:background="@drawable/rectangle"
+                app:passwordToggleEnabled="true"
+                >
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtTextPassConfirmRegister"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/rectangle"
+                    android:textColor="@color/hintGrayColor"
+                    android:textColorHint="@color/hintGrayColor"
+                    android:text=""
+                    android:inputType="textPassword"
+                    android:hint="Confirm Password" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/edtPhoneNumberRegister"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:background="@drawable/rectangle"
+                android:hint="Phone Number"
+                android:maxLength="10"
+                android:inputType="phone"
+                android:text=""
+                android:padding="@dimen/_10sdp"
+                android:textColor="@color/hintGrayColor"
+                android:textColorHint="@color/hintGrayColor"
+                android:textSize="14sp"
+                android:windowSoftInputMode="stateVisible"
+                android:imeOptions="actionDone" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/edtStreetAddressRegister"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:background="@drawable/rectangle"
+                android:inputType="textCapSentences"
+                android:hint="Department Name"
+                android:padding="@dimen/_10sdp"
+                android:maxLines="10"
+                android:text=""
+                android:textColor="@color/hintGrayColor"
+                android:textColorHint="@color/hintGrayColor"
+                android:textSize="14sp"
+                android:windowSoftInputMode="stateVisible" />
+
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/edtApptSuiteRegister"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:background="@drawable/rectangle"
+                android:inputType="textCapSentences"
+                android:hint="Department Type"
+                android:padding="@dimen/_10sdp"
+                android:maxLines="10"
+                android:text=""
+                android:textColor="@color/hintGrayColor"
+                android:textColorHint="@color/hintGrayColor"
+                android:textSize="14sp"
+                android:windowSoftInputMode="stateVisible" />
+
+
+<!--            <androidx.appcompat.widget.AppCompatEditText-->
+<!--                android:id="@+id/edtCityRegister"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--               -->
+<!--                android:background="@drawable/rectangle"-->
+<!--                android:inputType="textCapSentences"-->
+<!--                android:hint="City"-->
+<!--                android:padding="@dimen/_10sdp"-->
+<!--                android:text="Ahmedabad"-->
+<!--                android:maxLines="10"-->
+<!--               -->
+<!--                android:textSize="14sp"-->
+<!--                android:windowSoftInputMode="stateVisible" />-->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:background="@drawable/rectangle"
+                android:gravity="center"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.AppCompatSpinner
+                    android:id="@+id/edtCityRegister"
+                    android:layout_width="match_parent"
+                    android:textColor="@color/hintGrayColor"
+                    android:textColorHint="@color/hintGrayColor"
+                    android:layout_height="40dp"
+                    android:backgroundTint="@color/black"
+                    android:overlapAnchor="false" />
+            </LinearLayout>
+
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/edtStateRegister"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:background="@drawable/rectangle"
+                android:inputType="textCapSentences"
+                android:hint="State"
+                android:padding="@dimen/_10sdp"
+                android:maxLines="10"
+                android:text=""
+                android:textColor="@color/hintGrayColor"
+                android:textColorHint="@color/hintGrayColor"
+                android:textSize="14sp"
+                android:windowSoftInputMode="stateVisible" />
+
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/edtZipCodeRegister"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:background="@drawable/rectangle"
+                android:inputType="number"
+                android:hint="Zip Code"
+                android:padding="@dimen/_10sdp"
+                android:text=""
+                android:maxLines="10"
+                android:textColor="@color/hintGrayColor"
+                android:textColorHint="@color/hintGrayColor"
+                android:textSize="14sp"
+                android:windowSoftInputMode="stateVisible" />
+
+
+
+
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_register"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/_30sdp"
+                android:layout_marginBottom="@dimen/_25sdp"
+                android:background="@drawable/rectangle_green"
+                android:includeFontPadding="false"
+                android:textAllCaps="false"
+                android:paddingStart="@dimen/_50sdp"
+                android:paddingEnd="@dimen/_50sdp"
+                android:text="@string/register"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_15sdp" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/txtSignInRegister"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="@dimen/_20sdp"
+                android:textColor="@color/darkGrey"
+                android:paddingBottom="@dimen/_15sdp"
+                android:text="@string/already_have_an_account_login" />
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>
