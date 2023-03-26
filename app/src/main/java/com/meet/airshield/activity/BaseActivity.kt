@@ -45,4 +45,69 @@ open class BaseActivity : AppCompatActivity() {
         emailId=sharedPrefrances.getString("EMAIL_ID","").toString()
         city=sharedPrefrances.getString("CITY","").toString()
     }
+
+
+
+//    private fun sendNotification(current: LocalDateTime) {
+//        createDefaultChannel()
+//        val builder =
+//            NotificationCompat.Builder(context, CHANNEL_ID1)
+//                .setColor(ContextCompat.getColor(context, R.color.black))
+//                .setContentTitle(current.toString())
+//                .setContentText("water")
+//                .setSubText("Hello")
+//                .setPriority(NotificationCompat.PRIORITY_HIGH)
+//                .setSmallIcon(androidx.loader.R.drawable.notification_bg)
+//                .setAutoCancel(true)
+//        NotificationManagerCompat.from(context).notify(uniqueId, builder.build())
+//    }
+
+
+//    private fun createDefaultChannel() {
+//        val context: Context = applicationContext
+//
+//        val sound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+//
+//        val attributes: AudioAttributes = AudioAttributes.Builder()
+//            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+//            .build()
+//
+//        val channel = NotificationChannel(
+//            CHANNEL_ID1,
+//            CHANNEL_NAME1,
+//            NotificationManager.IMPORTANCE_HIGH
+//        )
+//
+//        channel.setSound(sound, attributes)
+//        NotificationManagerCompat.from(context).createNotificationChannel(channel)
+//    }
+
+//    fun multipleReq(){
+//        lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
+//        var isReadPermissionGranted: Boolean = false
+//        var isnotificayioPermissionGranted: Boolean = false
+//
+//        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+//                isReadPermissionGranted = permissions[Manifest.permission.SEND_SMS] ?: isReadPermissionGranted
+//                isnotificayioPermissionGranted = permissions[Manifest.permission.POST_NOTIFICATIONS] ?: isReadPermissionGranted
+//            }
+//    }
+
+//    fun reqPremission() {
+//        isReadPermissionGranted = ContextCompat.checkSelfPermission(this,
+//            Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
+//        isnotificayioPermissionGranted = ContextCompat.checkSelfPermission(this,
+//            Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+//
+//        val permissionREq: MutableList<String> = ArrayList()
+//        if (!isReadPermissionGranted) {
+//            permissionREq.add(Manifest.permission.SEND_SMS)
+//        }
+//        if (!isReadPermissionGranted) {
+//            permissionREq.add(Manifest.permission.POST_NOTIFICATIONS)
+//        }
+//        if (permissionREq.isNotEmpty()) {
+//            permissionLauncher.launch(permissionREq.toTypedArray())
+//        }
+//    }
 }
