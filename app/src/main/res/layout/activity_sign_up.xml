@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:overScrollMode="never"
-     >
+        >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -87,6 +87,9 @@
                 android:background="@drawable/rectangle"
                 app:passwordToggleEnabled="true"
                 app:boxStrokeWidth="0dp"
+                android:textColorHint="@color/hintGrayColor"
+                android:hint="Password"
+                app:passwordToggleTint="@color/black"
                 app:boxStrokeWidthFocused="0dp"
                 >
 
@@ -98,8 +101,7 @@
                     android:inputType="textPassword"
                     android:textColor="@color/hintGrayColor"
                     android:text=""
-                    android:textColorHint="@color/hintGrayColor"
-                    android:hint="Password"/>
+                    />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -110,6 +112,9 @@
                 app:boxStrokeWidthFocused="0dp"
                 android:layout_marginTop="@dimen/_10sdp"
                 android:background="@drawable/rectangle"
+                app:passwordToggleTint="@color/black"
+                android:textColorHint="@color/hintGrayColor"
+                android:hint="Confirm Password"
                 app:passwordToggleEnabled="true"
                 >
 
@@ -119,10 +124,9 @@
                     android:layout_height="match_parent"
                     android:background="@drawable/rectangle"
                     android:textColor="@color/hintGrayColor"
-                    android:textColorHint="@color/hintGrayColor"
                     android:text=""
                     android:inputType="textPassword"
-                    android:hint="Confirm Password" />
+                    />
             </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -177,20 +181,20 @@
                 android:windowSoftInputMode="stateVisible" />
 
 
-<!--            <androidx.appcompat.widget.AppCompatEditText-->
-<!--                android:id="@+id/edtCityRegister"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--               -->
-<!--                android:background="@drawable/rectangle"-->
-<!--                android:inputType="textCapSentences"-->
-<!--                android:hint="City"-->
-<!--                android:padding="@dimen/_10sdp"-->
-<!--                android:text="Ahmedabad"-->
-<!--                android:maxLines="10"-->
-<!--               -->
-<!--                android:textSize="14sp"-->
-<!--                android:windowSoftInputMode="stateVisible" />-->
+            <!--            <androidx.appcompat.widget.AppCompatEditText-->
+            <!--                android:id="@+id/edtCityRegister"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--               -->
+            <!--                android:background="@drawable/rectangle"-->
+            <!--                android:inputType="textCapSentences"-->
+            <!--                android:hint="City"-->
+            <!--                android:padding="@dimen/_10sdp"-->
+            <!--                android:text="Ahmedabad"-->
+            <!--                android:maxLines="10"-->
+            <!--               -->
+            <!--                android:textSize="14sp"-->
+            <!--                android:windowSoftInputMode="stateVisible" />-->
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -203,7 +207,6 @@
                     android:id="@+id/edtCityRegister"
                     android:layout_width="match_parent"
                     android:textColor="@color/hintGrayColor"
-                    android:textColorHint="@color/hintGrayColor"
                     android:layout_height="40dp"
                     android:backgroundTint="@color/black"
                     android:overlapAnchor="false" />

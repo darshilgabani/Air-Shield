@@ -14,7 +14,6 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.unsplashdemo.retrofit.retrofitBuilder
 import com.meet.airshield.R
-import com.meet.airshield.activity.BaseActivity
 import com.meet.airshield.activity.MainActivity
 import com.meet.airshield.model.WakiModel
 import retrofit2.Call
@@ -22,11 +21,11 @@ import retrofit2.Callback
 import retrofit2.Response
 
 
-class apiWorkerService(private val context: Context, params: WorkerParameters) :
+class BackgroundWorker(private val context: Context, params: WorkerParameters) :
     Worker(context, params) {
     var uniqueId = 123
-    var CHANNEL_ID1 = "id"
-    var CHANNEL_NAME1 = "name"
+    private var CHANNEL_ID1 = "id"
+    private var CHANNEL_NAME1 = "name"
     override fun doWork(): Result {
         val city =  inputData.getString("CITY")
         getData(city)
@@ -35,12 +34,17 @@ class apiWorkerService(private val context: Context, params: WorkerParameters) :
     }
 
     @SuppressLint("MissingPermission")
-    private fun sendNotification(aqiLevel: String, level: String, precaution: String) {
+    private fun sendNotification(
+        aqiLevel: String,
+        level: String,
+        precaution: String,
+        warning: String
+    ) {
 
         val builder1 = NotificationCompat.Builder(applicationContext, CHANNEL_ID1).setStyle(
             NotificationCompat.BigTextStyle().setBigContentTitle(aqiLevel)
                 .bigText(precaution)
-        ).setContentTitle(aqiLevel).setSubText(level)
+        ).setContentTitle(aqiLevel).setSubText(warning)
             .setOnlyAlertOnce(true)
             .setContentText(level)
             .setSmallIcon(R.mipmap.ic_launcher)
@@ -81,10 +85,10 @@ class apiWorkerService(private val context: Context, params: WorkerParameters) :
                     response: Response<WakiModel?>
                 ) {
                     if (response.body() != null) {
-                        var responseBody = response.body()
+                        val responseBody = response.body()
 
                         if (responseBody?.data?.aqi == null) return
-                        var airQuality = AirQualityStatus(responseBody.data?.aqi!!.toInt())
+                        val airQuality = airQualityStatus(responseBody.data?.aqi!!.toInt())
                         aqiLevel = responseBody.data?.aqi!!
 
                         if (airQuality == 1) {
@@ -120,12 +124,12 @@ class apiWorkerService(private val context: Context, params: WorkerParameters) :
                             level = "Unhealthy"
                             warning = "Some members of the general public may experience health effects; members of sensitive groups may experience more serious health effects."
                             precaution = "Sensitive groups: Avoid prolonged or heavy exertion\n" +
-                                        "\n" +
-                                        "indoors or reschedule to a time when the air quality is better.\n" +
-                                        "\n" +
-                                        "Everyone else: Reduce prolonged or heavy exertion. Take more\n" +
-                                        "\n" +
-                                        "breaks during all outdoor activities."
+                                    "\n" +
+                                    "indoors or reschedule to a time when the air quality is better.\n" +
+                                    "\n" +
+                                    "Everyone else: Reduce prolonged or heavy exertion. Take more\n" +
+                                    "\n" +
+                                    "breaks during all outdoor activities."
                         } else if (airQuality == 5) {
                             level = "Very Unhealthy"
                             warning =
@@ -148,14 +152,12 @@ class apiWorkerService(private val context: Context, params: WorkerParameters) :
                         } else {
                             level = "Good"
                             precaution = "hello"
-                            var warning =
-                                "Air quality is satisfactory, and air pollution poses little or no risk."
+                            warning = "Air quality is satisfactory, and air pollution poses little or no risk."
 
                         }
 
-                        sendNotification(aqiLevel.toString(), level, precaution)
-
                     }
+                    sendNotification(aqiLevel.toString(), level, precaution,warning)
                 }
 
                 override fun onFailure(call: Call<WakiModel?>, t: Throwable) {
@@ -166,21 +168,21 @@ class apiWorkerService(private val context: Context, params: WorkerParameters) :
 
     }
 
-    fun AirQualityStatus(aqi: Int): Int {
-        if (aqi <= 50) {
-            return 1
-        } else if (aqi >= 51 && aqi <= 100) {
-            return 2
-        } else if (aqi >= 101 && aqi <= 150) {
-            return 3
-        } else if (aqi >= 151 && aqi <= 200) {
-            return 4
-        } else if (aqi >= 201 && aqi <= 250) {
-            return 5
-        } else if (aqi >= 251 && aqi <= 300) {
-            return 6
+    fun airQualityStatus(aqi: Int): Int {
+        return if (aqi <= 50) {
+            1
+        } else if (aqi in 51..100) {
+            2
+        } else if (aqi in 101..150) {
+            3
+        } else if (aqi in 151..200) {
+            4
+        } else if (aqi in 201..250) {
+            5
+        } else if (aqi in 251..300) {
+            6
         } else {
-            return 0
+            0
         }
     }
 

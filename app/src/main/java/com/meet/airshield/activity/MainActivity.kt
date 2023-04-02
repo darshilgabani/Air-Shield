@@ -1,55 +1,35 @@
 package com.meet.airshield.activity
 
-import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Geocoder
-import android.location.Location
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.telephony.SmsManager
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.work.*
 import com.example.unsplashdemo.model.WeatherDataClass
 import com.example.unsplashdemo.retrofit.retrofitBuilder
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.meet.airshield.databinding.ActivityMainBinding
 import com.meet.airshield.model.WakiModel
-import com.meet.airshield.workers.apiWorkerService
+import com.meet.airshield.workers.BackgroundWorker
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.*
 import java.util.concurrent.TimeUnit
-import javax.mail.*
-import javax.mail.internet.AddressException
-import javax.mail.internet.InternetAddress
-import javax.mail.internet.MimeMessage
 
 class MainActivity : BaseActivity() {
     lateinit var binding: ActivityMainBinding
-    val key1: String = "6e36bca08bf7e7708823224d3772beb7"
+    private val key1: String = "6e36bca08bf7e7708823224d3772beb7"
 
     //    val key2: String = "f2db178aa0985eac450c13303722a0ff15624729"
 //    var cityRegister: String = ""
-    var phoneNumberREgister = ""
-    var senderMail = "meet.devstree@gmail.com"
-    var senderMailPasword = "warszkyujnnnvews"
-    var receiverMail = emailId
     var message = "Air Quality"
     var mail = "Air Quality"
-    lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
-    var isReadPermissionGranted: Boolean = false
-
-    private var lastLocation: Location? = null
+    var latitude: Double = 0.00
+    var longiude: Double = 0.00
 
     companion object {
         val key2: String = "f2db178aa0985eac450c13303722a0ff15624729"
@@ -62,22 +42,20 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         binding.progressbar.visibility = View.VISIBLE
+        if (!isOnline()) {
+            toastMe("Please Turn On Internet")
+            return
+        }
+        checkGpsStatus()
+        getNotificationPermission()
+        requestOtherPermissions()
+        fetchLocation()
         loadData()
+
         cityRegister = city
         phoneNumberREgister = phoneNumber
         receiverMail = emailId
-        getPermission()
-        isLocationGPSEnable()
-        fetchLocation()
 
-//        getLocation()
-        getData()
-        permissionLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-                isReadPermissionGranted =
-                    permissions[Manifest.permission.SEND_SMS] ?: isReadPermissionGranted
-            }
-        reqPremission()
         binding.aqiCircle.aqiTextView.setOnClickListener {
             if (binding.edtPhoneNumber.text.isNullOrEmpty()) {
                 Toast.makeText(this, "Please Enter Contact Number", Toast.LENGTH_SHORT).show()
@@ -101,85 +79,49 @@ class MainActivity : BaseActivity() {
             startActivity(intent)
             finish()
         }
-        getACallinBg()
+        getData()
+
     }
 
-    fun reqPremission() {
-        isReadPermissionGranted =
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.SEND_SMS
-            ) == PackageManager.PERMISSION_GRANTED
+//    fun reqPremission() {
+//        var isReadPermissionGranted: Boolean = false
+//        var permissionLauncher: ActivityResultLauncher<Array<String>> =
+//            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+//                isReadPermissionGranted =
+//                    permissions[Manifest.permission.SEND_SMS] ?: isReadPermissionGranted
+//            }
+//        isReadPermissionGranted =
+//            ContextCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.SEND_SMS
+//            ) == PackageManager.PERMISSION_GRANTED
+//
+//        val permissionREq: MutableList<String> = ArrayList()
+//        if (!isReadPermissionGranted) {
+//            permissionREq.add(Manifest.permission.SEND_SMS)
+//        }
+//        if (permissionREq.isNotEmpty()) {
+//            permissionLauncher.launch(permissionREq.toTypedArray())
+//        }
+//    }
 
-        val permissionREq: MutableList<String> = ArrayList()
-        if (!isReadPermissionGranted) {
-            permissionREq.add(Manifest.permission.SEND_SMS)
-        }
-        if (permissionREq.isNotEmpty()) {
-            permissionLauncher.launch(permissionREq.toTypedArray())
-        }
-    }
 
-
-    fun sendSms(message: String) {
-        try {
-            val smsManager: SmsManager
-            if (Build.VERSION.SDK_INT >= 23) {
-                smsManager = this.getSystemService(SmsManager::class.java)
-            } else {
-                smsManager = SmsManager.getDefault()
-            }
-            smsManager.sendTextMessage(phoneNumber, null, message, null, null)
-            Toast.makeText(applicationContext, "Message Sent", Toast.LENGTH_LONG).show()
-        } catch (e: Exception) {
-            Log.e("sms send failed", e.message.toString())
-        }
-    }
-
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         super.onBackPressed()
         finishAffinity()
     }
 
-    fun sendMail(message: String) {
-        try {
-            val stringSenderEmail = senderMail
-            val stringReceiverEmail = receiverMail
-            val stringPasswordSenderEmail = senderMailPasword //"warszkyujnnnvews"
-            val stringHost = "smtp.gmail.com"
-            val properties = System.getProperties()
-            properties["mail.smtp.host"] = stringHost
-            properties["mail.smtp.port"] = "465"
-            properties["mail.smtp.ssl.enable"] = "true"
-            properties["mail.smtp.auth"] = "true"
-            val session = Session.getInstance(properties, object : Authenticator() {
-                override fun getPasswordAuthentication(): PasswordAuthentication {
-                    return PasswordAuthentication(stringSenderEmail, stringPasswordSenderEmail)
-                }
-            })
-            val mimeMessage = MimeMessage(session)
-            mimeMessage.addRecipient(Message.RecipientType.TO, InternetAddress(stringReceiverEmail))
-            mimeMessage.subject = "Subject: Air Quality Alert"
-            mimeMessage.setText(message)
-            val thread = Thread {
-                try {
-                    Transport.send(mimeMessage)
-                } catch (e: MessagingException) {
-                    e.printStackTrace()
-                }
-            }
-            thread.start()
-        } catch (e: AddressException) {
-            e.printStackTrace()
-        } catch (e: MessagingException) {
-            e.printStackTrace()
-        }
-    }
-    fun getData() {
-        var nh3: String? = null
-        var no: String? = null
-        var no3: String? = null
-        var co: String? = null
+
+    private fun getData() {
+        var nh3 = ""
+        var no = ""
+        var no3 = ""
+        var co = ""
+        var so2 = ""
+        var no2 = ""
+        var pm25 = ""
+        var pm10 = ""
 
         retrofitBuilder.WeatherApi.getWeatherData(latitude.toString(), longiude.toString(), key1)
             .enqueue(object : Callback<WeatherDataClass?> {
@@ -192,7 +134,7 @@ class MainActivity : BaseActivity() {
                         nh3 = "NH3 : ${responseBody.list[0].components?.nh3}"
                         no = "NO : ${responseBody.list[0].components?.no}"
                         no3 = "NO3 : ${responseBody.list[0].components?.o3}"
-                        co = "CO : ${responseBody.list[0].components?.co}"
+                        so2 = "So2 : ${responseBody.list[0].components?.so2}"
 
                     }
                 }
@@ -203,7 +145,6 @@ class MainActivity : BaseActivity() {
                 }
             })
         Handler().postDelayed({
-
             retrofitBuilder.WeatherApiWaki.getLocationAQI(apiSendLocation, key2)
                 ?.enqueue(object : Callback<WakiModel?> {
                     override fun onResponse(
@@ -211,15 +152,15 @@ class MainActivity : BaseActivity() {
                         response: Response<WakiModel?>
                     ) {
 
-                        var responseBody = response.body()
+                        val responseBody = response.body()
 //                    if (responseBody?.status=="error"){
 //                        Toast.makeText(applicationContext,"Please Register With Other City", Toast.LENGTH_SHORT).show()
 //                    }
                         if (responseBody != null) {
                             binding.aqiCircle.aqiTextView.text =
                                 responseBody.data?.aqi.toString()
-                            if (responseBody?.data?.aqi == null) return
-                            var airQuality = AirQualityStatus(responseBody.data?.aqi!!)
+                            if (responseBody.data?.aqi == null) return
+                            val airQuality = airQualityStatus(responseBody.data?.aqi!!)
 //                        var airQuality = 4
                             var level = ""
                             var warning = ""
@@ -305,23 +246,23 @@ class MainActivity : BaseActivity() {
                             } else {
                                 level = "Good"
                                 precaution = ""
-                                var warning =
-                                    "Air quality is satisfactory, and air pollution poses little or no risk."
+                                warning = "Air quality is satisfactory, and air pollution poses little or no risk."
                                 binding.aqiInfoCard.aqiInfoTitle.text = ""
                                 binding.aqiInfoCard.aqiInfoDesc.text = ""
                                 binding.attributionCard.attributionTextView.text = precaution
                             }
 
-                            binding.pollutantCard.param2.text =
-                                "NO2 : ${responseBody.data?.iaqi?.no2?.v}"
-                            binding.pollutantCard.param3.text =
-                                "SO2 : ${responseBody.data?.iaqi?.so2?.v}"
-                            binding.pollutantCard.param4.text =
-                                "PM2.5 : ${responseBody.data?.iaqi?.pm25?.v}"
-                            binding.pollutantCard.param5.text =
-                                "PM10 : ${responseBody.data?.iaqi?.pm10?.v}"
+                            co = "CO : ${responseBody.data?.iaqi?.co?.v}"
+                            no2 = "NO2 : ${responseBody.data?.iaqi?.no2?.v}"
+                            pm25 = "PM2.5 : ${responseBody.data?.iaqi?.pm25?.v}"
+                            pm10 = "PM10 : ${responseBody.data?.iaqi?.pm10?.v}"
 
                             binding.pollutantCard.param1.text = co
+                            binding.pollutantCard.param2.text = no2
+                            binding.pollutantCard.param3.text = so2
+                            binding.pollutantCard.param4.text = pm25
+                            binding.pollutantCard.param5.text = pm10
+
                             binding.pollutantCard.param6.text = nh3
                             binding.pollutantCard.param7.text = no
                             binding.pollutantCard.param8.text = no3
@@ -332,41 +273,42 @@ class MainActivity : BaseActivity() {
 
                             message = "Here is a air quality data" +
                                     "\n ** Aqi : ${responseBody.data?.aqi.toString()} **" +
-                                    "\n ${co}" +
-                                    "\n NO2 : ${responseBody.data?.iaqi?.no2?.v}" +
-                                    "\n SO2 : ${responseBody.data?.iaqi?.so2?.v}" +
-                                    "\n PM 2.5 : ${responseBody.data?.iaqi?.pm25?.v}" +
-                                    "\n PM 10 : ${responseBody.data?.iaqi?.pm10?.v}" +
-                                    "\n ${nh3}" +
-                                    "\n ${no}" +
-                                    "\n ${no3}"
+                                    "\n $co" +
+                                    "\n $no2" +
+                                    "\n $so2" +
+                                    "\n $pm25" +
+                                    "\n $pm10" +
+                                    "\n $nh3" +
+                                    "\n $no" +
+                                    "\n $no3"
 
 
 
                             mail = "HERE IS A AIR QUALITY DATA " +
                                     "\n" +
                                     "\n AQI : ${responseBody.data?.aqi.toString()} " +
-                                    "\n Level : ${level}" +
+                                    "\n Level : $level" + "\n" +
                                     "HERE IS A AIR QUALITY DATA " +
                                     "\n" +
-                                    "\n ${co}" +
-                                    "\n NO2  : ${responseBody.data?.iaqi?.no2?.v}" +
-                                    "\n SO2  : ${responseBody.data?.iaqi?.so2?.v}" +
-                                    "\n PM 2.5  : ${responseBody.data?.iaqi?.pm25?.v}" +
-                                    "\n PM 10  : ${responseBody.data?.iaqi?.pm10?.v}" +
-                                    "\n ${nh3}" +
-                                    "\n ${no}" +
-                                    "\n ${no3}" +
+                                    "\n $co" +
+                                    "\n $no2" +
+                                    "\n $no3" +
+                                    "\n $pm25" +
+                                    "\n $pm10" +
+                                    "\n $nh3" +
+                                    "\n $no" +
+                                    "\n $no3" +
                                     "\n" +
-                                    "\n Warning : ${warning}" +
-                                    "\n Precautions : ${precaution} "
+                                    "\n Warning : $warning" +
+                                    "\n Precautions : $precaution"
                             Log.e("message", message)
+                            getACallingBg()
                             binding.progressbar.visibility = View.INVISIBLE
                         }
                     }
 
                     override fun onFailure(call: Call<WakiModel?>, t: Throwable) {
-                        Log.e("waki", t.message.toString())
+                        Log.e("waqi", t.message.toString())
                         binding.progressbar.visibility = View.INVISIBLE
                     }
                 })
@@ -374,71 +316,69 @@ class MainActivity : BaseActivity() {
         }, 500)
     }
 
-    fun getPermission() {
-        if (Build.VERSION.SDK_INT >= 33) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.POST_NOTIFICATIONS), 101
-                );
-            }
-        }
-    }
-
-    fun getACallinBg() {
+    fun getACallingBg() {
         val constraints =
             Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
         val data = Data.Builder()
-        data.putString("CITY", apiSendLocation)
+        data.putString("CITY", "geo:$latitude;$longiude")
         val workRequest =
             PeriodicWorkRequest.Builder(
-                apiWorkerService::class.java,
+                BackgroundWorker::class.java,
                 15,
                 TimeUnit.MINUTES,
                 1,
                 TimeUnit.MINUTES
-            )
-                .setInputData(data.build())
+            ).setInputData(data.build())
                 .setConstraints(constraints).build()
         WorkManager.getInstance(this).enqueue(workRequest)
     }
 
-    fun AirQualityStatus(aqi: Int): Int {
-        if (aqi <= 50) {
-            return 1
-        } else if (aqi >= 51 && aqi <= 100) {
-            return 2
-        } else if (aqi >= 101 && aqi <= 150) {
-            return 3
-        } else if (aqi >= 151 && aqi <= 200) {
-            return 4
-        } else if (aqi >= 201 && aqi <= 250) {
-            return 5
-        } else if (aqi >= 251 && aqi <= 300) {
-            return 6
+    fun airQualityStatus(aqi: Int): Int {
+        return if (aqi <= 50) {
+            1
+        } else if (aqi in 51..100) {
+            2
+        } else if (aqi in 101..150) {
+            3
+        } else if (aqi in 151..200) {
+            4
+        } else if (aqi in 201..250) {
+            5
+        } else if (aqi in 251..300) {
+            6
         } else {
-            return 0
+            0
         }
     }
 
-//    private fun updateLocationUI() {
-//        try {
-//            fusedLocationClient?.lastLocation?.addOnCompleteListener { task ->
-//                if (task.isSuccessful) {
-//                    val location = task.result
-//                    if (location != null) {
-//                        latitude = location.latitude
-//                        longiude = location.longitude
-//                    }
-//                }
-//            }
-//            apiSendLocation="geo:$latitude;$longiude"
-//        } catch (e: SecurityException) {
-//            Log.e("Exception: %s", e.message.toString())
-//        }
-//    }
+    private fun fetchLocation() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        val task = fusedLocationClient?.lastLocation
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
+                101
+            )
+            return
+        }
+        task?.addOnSuccessListener {
+            if (it != null) {
+//                checkGpsStatus()
+                latitude = it.latitude
+                longiude = it.longitude
+                Log.e("lat", latitude.toString())
+                Log.e("long", longiude.toString())
+                apiSendLocation = "geo:$latitude;$longiude"
+            }
+        }
+    }
+
 }
