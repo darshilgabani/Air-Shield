@@ -46,6 +46,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/rectangle"
+            android:inputType="textEmailAddress"
+            android:imeOptions="actionNext"
             android:text=""
             android:textColor="@color/hintGrayColor"
             app:boxStrokeWidth="0dp"
@@ -71,6 +73,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/rectangle"
+            android:imeOptions="actionDone"
             android:textColor="@color/hintGrayColor"
             android:inputType="textPassword"
             />
