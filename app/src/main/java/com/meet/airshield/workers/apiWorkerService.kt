@@ -1,7 +1,6 @@
 package com.meet.airshield.workers
 
 import android.annotation.SuppressLint
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -11,12 +10,11 @@ import android.net.Uri
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getColor
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.unsplashdemo.retrofit.retrofitBuilder
 import com.meet.airshield.R
+import com.meet.airshield.activity.BaseActivity
 import com.meet.airshield.activity.MainActivity
 import com.meet.airshield.model.WakiModel
 import retrofit2.Call
@@ -29,25 +27,15 @@ class apiWorkerService(private val context: Context, params: WorkerParameters) :
     var uniqueId = 123
     var CHANNEL_ID1 = "id"
     var CHANNEL_NAME1 = "name"
-
-
     override fun doWork(): Result {
-
-        getData()
+        val city =  inputData.getString("CITY")
+        getData(city)
         createDefaultChannel()
         return Result.success()
     }
 
     @SuppressLint("MissingPermission")
     private fun sendNotification(aqiLevel: String, level: String, precaution: String) {
-//        val builder = NotificationCompat.Builder(context, CHANNEL_ID1)
-//                .setColor(ContextCompat.getColor(context, R.color.black))
-//                .setContentTitle(aqiLevel.toString())
-//                .setContentText(level)
-//                .setSubText(precaution)
-//                .setPriority(NotificationCompat.PRIORITY_HIGH)
-//                .setSmallIcon(androidx.loader.R.drawable.notification_bg)
-//                .setAutoCancel(true)
 
         val builder1 = NotificationCompat.Builder(applicationContext, CHANNEL_ID1).setStyle(
             NotificationCompat.BigTextStyle().setBigContentTitle(aqiLevel)
@@ -78,27 +66,25 @@ class apiWorkerService(private val context: Context, params: WorkerParameters) :
         NotificationManagerCompat.from(context).createNotificationChannel(channel)
     }
 
-    fun getData() {
+    fun getData(city: String?) {
         var aqiLevel = 100
         var level = ""
         var warning = ""
         var precaution = ""
-        Log.e("get Data", "fun called ")
-        retrofitBuilder.WeatherApiWaki.getLocationAQI(MainActivity.cityRegister, MainActivity.key2)
+        retrofitBuilder.WeatherApiWaki.getLocationAQI(
+            city,
+            MainActivity.key2
+        )
             ?.enqueue(object : Callback<WakiModel?> {
                 override fun onResponse(
                     call: Call<WakiModel?>,
                     response: Response<WakiModel?>
                 ) {
+                    if (response.body() != null) {
+                        var responseBody = response.body()
 
-                    var responseBody = response.body()
-//                    if (responseBody?.status=="error"){
-//                        Toast.makeText(applicationContext,"Please Register With Other City", Toast.LENGTH_SHORT).show()
-//                    }
-                    if (responseBody != null) {
-
-                        var airQuality = AirQualityStatus(responseBody.data?.aqi!!)
-//                        var airQuality = 7
+                        if (responseBody?.data?.aqi == null) return
+                        var airQuality = AirQualityStatus(responseBody.data?.aqi!!.toInt())
                         aqiLevel = responseBody.data?.aqi!!
 
                         if (airQuality == 1) {
@@ -132,10 +118,8 @@ class apiWorkerService(private val context: Context, params: WorkerParameters) :
                                         "have any of these, contact your heath care provider."
                         } else if (airQuality == 4) {
                             level = "Unhealthy"
-                            warning =
-                                "Some members of the general public may experience health effects; members of sensitive groups may experience more serious health effects."
-                            precaution =
-                                "Sensitive groups: Avoid prolonged or heavy exertion. Move activ\n" +
+                            warning = "Some members of the general public may experience health effects; members of sensitive groups may experience more serious health effects."
+                            precaution = "Sensitive groups: Avoid prolonged or heavy exertion\n" +
                                         "\n" +
                                         "indoors or reschedule to a time when the air quality is better.\n" +
                                         "\n" +

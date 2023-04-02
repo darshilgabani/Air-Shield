@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -13,14 +14,13 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequest
-import androidx.work.WorkManager
+import androidx.work.*
 import com.example.unsplashdemo.model.WeatherDataClass
 import com.example.unsplashdemo.retrofit.retrofitBuilder
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.meet.airshield.databinding.ActivityMainBinding
 import com.meet.airshield.model.WakiModel
 import com.meet.airshield.workers.apiWorkerService
@@ -33,12 +33,12 @@ import javax.mail.*
 import javax.mail.internet.AddressException
 import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
-import androidx.work.*
 
 class MainActivity : BaseActivity() {
     lateinit var binding: ActivityMainBinding
     val key1: String = "6e36bca08bf7e7708823224d3772beb7"
-//    val key2: String = "f2db178aa0985eac450c13303722a0ff15624729"
+
+    //    val key2: String = "f2db178aa0985eac450c13303722a0ff15624729"
 //    var cityRegister: String = ""
     var phoneNumberREgister = ""
     var senderMail = "meet.devstree@gmail.com"
@@ -48,13 +48,15 @@ class MainActivity : BaseActivity() {
     var mail = "Air Quality"
     lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     var isReadPermissionGranted: Boolean = false
-    var latitude: Double = 0.00
-    var longiude: Double = 0.00
 
-companion object{
-    val key2: String = "f2db178aa0985eac450c13303722a0ff15624729"
-    var cityRegister: String = ""
-}
+    private var lastLocation: Location? = null
+
+    companion object {
+        val key2: String = "f2db178aa0985eac450c13303722a0ff15624729"
+        var apiSendLocation = ""
+        var cityRegister: String = ""
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         binding = ActivityMainBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
@@ -65,7 +67,10 @@ companion object{
         phoneNumberREgister = phoneNumber
         receiverMail = emailId
         getPermission()
-        getLocation()
+        isLocationGPSEnable()
+        fetchLocation()
+
+//        getLocation()
         getData()
         permissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -97,7 +102,6 @@ companion object{
             finish()
         }
         getACallinBg()
-
     }
 
     fun reqPremission() {
@@ -171,15 +175,6 @@ companion object{
             e.printStackTrace()
         }
     }
-
-    fun getLocation() {
-        var gc = Geocoder(this, Locale.getDefault())
-        var address = gc.getFromLocationName(city, 2)
-        latitude = address?.get(0)?.longitude!!
-        longiude = address?.get(0)?.longitude!!
-    }
-
-
     fun getData() {
         var nh3: String? = null
         var no: String? = null
@@ -209,7 +204,7 @@ companion object{
             })
         Handler().postDelayed({
 
-            retrofitBuilder.WeatherApiWaki.getLocationAQI(cityRegister, key2)
+            retrofitBuilder.WeatherApiWaki.getLocationAQI(apiSendLocation, key2)
                 ?.enqueue(object : Callback<WakiModel?> {
                     override fun onResponse(
                         call: Call<WakiModel?>,
@@ -223,7 +218,7 @@ companion object{
                         if (responseBody != null) {
                             binding.aqiCircle.aqiTextView.text =
                                 responseBody.data?.aqi.toString()
-
+                            if (responseBody?.data?.aqi == null) return
                             var airQuality = AirQualityStatus(responseBody.data?.aqi!!)
 //                        var airQuality = 4
                             var level = ""
@@ -272,7 +267,7 @@ companion object{
                                 warning =
                                     "Some members of the general public may experience health effects; members of sensitive groups may experience more serious health effects."
                                 precaution =
-                                    "Sensitive groups: Avoid prolonged or heavy exertion. Move activ\n" +
+                                    "Sensitive groups: Avoid prolonged or heavy exertion.\n" +
                                             "\n" +
                                             "indoors or reschedule to a time when the air quality is better.\n" +
                                             "\n" +
@@ -395,9 +390,19 @@ companion object{
     }
 
     fun getACallinBg() {
-        val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+        val constraints =
+            Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+        val data = Data.Builder()
+        data.putString("CITY", apiSendLocation)
         val workRequest =
-            PeriodicWorkRequest.Builder(apiWorkerService::class.java, 15, TimeUnit.MINUTES)
+            PeriodicWorkRequest.Builder(
+                apiWorkerService::class.java,
+                15,
+                TimeUnit.MINUTES,
+                1,
+                TimeUnit.MINUTES
+            )
+                .setInputData(data.build())
                 .setConstraints(constraints).build()
         WorkManager.getInstance(this).enqueue(workRequest)
     }
@@ -419,4 +424,21 @@ companion object{
             return 0
         }
     }
+
+//    private fun updateLocationUI() {
+//        try {
+//            fusedLocationClient?.lastLocation?.addOnCompleteListener { task ->
+//                if (task.isSuccessful) {
+//                    val location = task.result
+//                    if (location != null) {
+//                        latitude = location.latitude
+//                        longiude = location.longitude
+//                    }
+//                }
+//            }
+//            apiSendLocation="geo:$latitude;$longiude"
+//        } catch (e: SecurityException) {
+//            Log.e("Exception: %s", e.message.toString())
+//        }
+//    }
 }
