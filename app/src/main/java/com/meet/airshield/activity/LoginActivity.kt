@@ -12,6 +12,11 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.meet.airshield.R
+import com.meet.airshield.appHelper.AppHelper.emailId
+import com.meet.airshield.appHelper.AppHelper.isLogin
+import com.meet.airshield.appHelper.AppHelper.loadData
+import com.meet.airshield.appHelper.AppHelper.password
+import com.meet.airshield.appHelper.AppHelper.saveData
 import com.meet.airshield.databinding.ActivityLoginBinding
 import com.meet.airshield.utils.Utils
 
@@ -21,7 +26,7 @@ class LoginActivity : BaseActivity(){
         binding=ActivityLoginBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        loadData()
+        loadData(this)
 
         binding.txtNotHaveAcc.setOnClickListener {
             val intent = Intent(this, SignUpActivity::class.java)
@@ -30,17 +35,17 @@ class LoginActivity : BaseActivity(){
         }
         binding.btnLogIn.setOnClickListener {
             if (isValid()) {
-              if (binding.edtEmail.text.toString()!=emailId){
-                  Toast.makeText(this, "Please Enter Registered Email", Toast.LENGTH_LONG).show()
-              } else if (binding.edtPassword.text.toString()!=password){
-                  Toast.makeText(this, "Please Enter Registered Password", Toast.LENGTH_LONG).show()
-              }else{
-                  isLogin=true
-                  saveData()
-                  val intent = Intent(this, MainActivity::class.java)
-                  startActivity(intent)
-                  finish()
-              }
+                if (binding.edtEmail.text.toString()!=emailId){
+                    Toast.makeText(this, "Please Enter Registered Email", Toast.LENGTH_LONG).show()
+                } else if (binding.edtPassword.text.toString()!=password){
+                    Toast.makeText(this, "Please Enter Registered Password", Toast.LENGTH_LONG).show()
+                }else{
+                    isLogin=true
+                    saveData(this)
+                    val intent = Intent(this, MainActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                }
             }
         }
         spanText()

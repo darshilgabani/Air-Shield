@@ -8,116 +8,134 @@
     android:overScrollMode="never"
     android:scrollbars="none">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:context="com.piyushsatija.pollutionmonitor.view.fragment.AQIFragment">
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
 
-        <ProgressBar
-            android:id="@+id/progressbar"
-            style="?android:attr/progressBarStyleHorizontal"
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/mainLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:backgroundTint="@color/white"
-            android:indeterminate="true"
-            android:indeterminateTint="@color/yellow"
-            android:max="100"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="invisible" />
+            android:visibility="visible"
+            tools:context="com.piyushsatija.pollutionmonitor.view.fragment.AQIFragment">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/logOut"
-            android:layout_width="wrap_content"
-            android:layout_marginTop="@dimen/_20sdp"
-            android:text="Log Out"
-            android:textColor="@color/yellow"
-            android:drawablePadding="@dimen/_5sdp"
-            android:layout_marginEnd="@dimen/_5sdp"
-            android:layout_height="wrap_content"
-            android:drawableTop="@drawable/ic_logout"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/progressbar"
-            />
+            <ProgressBar
+                android:id="@+id/progressbar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:backgroundTint="@color/white"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/yellow"
+                android:max="100"
+                android:visibility="invisible"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <EditText
-            android:id="@+id/edtPhoneNumber"
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/logOut"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:layout_marginEnd="@dimen/_5sdp"
+                android:drawableTop="@drawable/ic_logout"
+                android:drawablePadding="@dimen/_5sdp"
+                android:text="Log Out"
+                android:textColor="@color/yellow"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/progressbar" />
+
+            <EditText
+                android:id="@+id/edtPhoneNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter Phone number here"
+                android:text="9773412892"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@+id/logOut" />
+
+            <include
+                android:id="@+id/aqiCircle"
+                layout="@layout/layout_aqi_circle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_5sdp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/edtPhoneNumber" />
+
+            <include
+                android:id="@+id/aqiLocationCard"
+                layout="@layout/layout_location_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/aqiCircle" />
+
+            <include
+                android:id="@+id/aqiInfoCard"
+                layout="@layout/layout_aqi_info_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/aqiLocationCard" />
+
+            <include
+                android:id="@+id/rateUsCard"
+                layout="@layout/layout_rate_us"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/aqiInfoCard" />
+
+            <include
+                android:id="@+id/airPropertiesLayout"
+                layout="@layout/layout_air_properties"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/rateUsCard" />
+
+            <include
+                android:id="@+id/pollutantCard"
+                layout="@layout/layout_pollutants_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/airPropertiesLayout" />
+
+            <include
+                android:id="@+id/attributionCard"
+                layout="@layout/layout_attributions_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/pollutantCard" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatCheckedTextView
+            android:id="@+id/errorLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/_150sdp"
+            android:gravity="center"
             android:textColor="@color/white"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@+id/logOut"
-            android:text="9773412892"
-            android:hint="Enter Phone number here" />
-
-        <include
-            android:id="@+id/aqiCircle"
-            layout="@layout/layout_aqi_circle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_5sdp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/edtPhoneNumber"/>
-
-        <include
-            android:id="@+id/aqiLocationCard"
-            layout="@layout/layout_location_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/aqiCircle" />
-
-        <include
-            android:id="@+id/aqiInfoCard"
-            layout="@layout/layout_aqi_info_card"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/aqiLocationCard" />
-
-        <include
-            android:id="@+id/rateUsCard"
-            layout="@layout/layout_rate_us"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/aqiInfoCard" />
-
-        <include
-            android:id="@+id/airPropertiesLayout"
-            layout="@layout/layout_air_properties"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_margin="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/rateUsCard" />
-
-        <include
-            android:id="@+id/pollutantCard"
-            layout="@layout/layout_pollutants_card"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/airPropertiesLayout" />
-
-        <include
-            android:id="@+id/attributionCard"
-            layout="@layout/layout_attributions_card"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/pollutantCard" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:text="Please Relaunch App "
+            android:visibility="gone" />
+    </LinearLayout>
 </ScrollView>

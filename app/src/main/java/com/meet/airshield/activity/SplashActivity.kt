@@ -3,6 +3,8 @@ package com.meet.airshield.activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import com.meet.airshield.appHelper.AppHelper.isLogin
+import com.meet.airshield.appHelper.AppHelper.loadData
 import com.meet.airshield.databinding.ActivitySplashBinding
 
 
@@ -13,7 +15,7 @@ class SplashActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         Handler().postDelayed({
-            loadData()
+            loadData(this)
             if (isLogin){
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)

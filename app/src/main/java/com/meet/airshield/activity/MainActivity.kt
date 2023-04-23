@@ -1,23 +1,44 @@
 package com.meet.airshield.activity
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.work.*
 import com.example.unsplashdemo.model.WeatherDataClass
 import com.example.unsplashdemo.retrofit.retrofitBuilder
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.meet.airshield.appHelper.AppHelper.emailId
+import com.meet.airshield.appHelper.AppHelper.isLogin
+import com.meet.airshield.appHelper.AppHelper.isRegistered
+import com.meet.airshield.appHelper.AppHelper.loadData
+import com.meet.airshield.appHelper.AppHelper.phoneNumber
+import com.meet.airshield.appHelper.AppHelper.saveData
 import com.meet.airshield.databinding.ActivityMainBinding
 import com.meet.airshield.model.WakiModel
 import com.meet.airshield.workers.BackgroundWorker
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class MainActivity : BaseActivity() {
@@ -28,11 +49,12 @@ class MainActivity : BaseActivity() {
 //    var cityRegister: String = ""
     var message = "Air Quality"
     var mail = "Air Quality"
-    var latitude: Double = 0.00
-    var longiude: Double = 0.00
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     companion object {
-        val key2: String = "f2db178aa0985eac450c13303722a0ff15624729"
+        const val key2: String = "f2db178aa0985eac450c13303722a0ff15624729"
+
+        //        const val key3: String = "8caced207cc3cdbf8efc9efa733bf789f09e3d27"
         var apiSendLocation = ""
         var cityRegister: String = ""
     }
@@ -46,13 +68,13 @@ class MainActivity : BaseActivity() {
             toastMe("Please Turn On Internet")
             return
         }
-        checkGpsStatus()
-        getNotificationPermission()
+//        checkGpsStatus()
+//        getNotificationPermission()
+        getLocationPermission()
         requestOtherPermissions()
-        fetchLocation()
-        loadData()
-
-        cityRegister = city
+        getLastKnownLocation()
+        enableGpsBroadcast()
+        loadData(this)
         phoneNumberREgister = phoneNumber
         receiverMail = emailId
 
@@ -73,38 +95,44 @@ class MainActivity : BaseActivity() {
             isRegistered = false
             phoneNumberREgister = ""
             emailId = ""
-            city = ""
-            saveData()
+            saveData(this)
             val intent = Intent(this, LandingPageActivity::class.java)
             startActivity(intent)
             finish()
         }
         getData()
 
+//        GlobalScope.launch(Dispatchers.Main){
+            requestOtherPermissions()
+//        }
     }
 
-//    fun reqPremission() {
-//        var isReadPermissionGranted: Boolean = false
-//        var permissionLauncher: ActivityResultLauncher<Array<String>> =
-//            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-//                isReadPermissionGranted =
-//                    permissions[Manifest.permission.SEND_SMS] ?: isReadPermissionGranted
-//            }
-//        isReadPermissionGranted =
-//            ContextCompat.checkSelfPermission(
-//                this,
-//                Manifest.permission.SEND_SMS
-//            ) == PackageManager.PERMISSION_GRANTED
-//
-//        val permissionREq: MutableList<String> = ArrayList()
-//        if (!isReadPermissionGranted) {
-//            permissionREq.add(Manifest.permission.SEND_SMS)
-//        }
-//        if (permissionREq.isNotEmpty()) {
-//            permissionLauncher.launch(permissionREq.toTypedArray())
-//        }
-//    }
+    fun enableGpsBroadcast() {
+        val locationProviderBroadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action == LocationManager.PROVIDERS_CHANGED_ACTION) {
+                    val locationManager =
+                        context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                    val isGpsEnabled =
+                        locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                    val isNetworkEnabled =
+                        locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
+                    if (isGpsEnabled || isNetworkEnabled) {
+                        Handler().postDelayed({
+                            toastMe("Gps on")
+                            getLastKnownLocation()
+                            getData()
+                        }, 5000)
+                    } else {
+                        toastMe("Gps is off")
+                    }
+                }
+            }
+        }
+        val intentFilter = IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
+        registerReceiver(locationProviderBroadcastReceiver, intentFilter)
+    }
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
@@ -113,7 +141,43 @@ class MainActivity : BaseActivity() {
     }
 
 
+    fun getACallingBg() {
+        val constraints =
+            Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+        val data = Data.Builder()
+        data.putString("CITY", "geo:$latitude;$longiude")
+        val workRequest =
+            PeriodicWorkRequest.Builder(
+                BackgroundWorker::class.java,
+                15,
+                TimeUnit.MINUTES,
+                1,
+                TimeUnit.MINUTES
+            ).setInputData(data.build())
+                .setConstraints(constraints).build()
+        WorkManager.getInstance(this).enqueue(workRequest)
+    }
+
+    fun airQualityStatus(aqi: Int): Int {
+        return if (aqi <= 50) {
+            1
+        } else if (aqi in 51..100) {
+            2
+        } else if (aqi in 101..150) {
+            3
+        } else if (aqi in 151..200) {
+            4
+        } else if (aqi in 201..250) {
+            5
+        } else if (aqi in 251..300) {
+            6
+        } else {
+            0
+        }
+    }
+
     private fun getData() {
+        binding.mainLayout.isVisible = false
         var nh3 = ""
         var no = ""
         var no3 = ""
@@ -122,6 +186,8 @@ class MainActivity : BaseActivity() {
         var no2 = ""
         var pm25 = ""
         var pm10 = ""
+
+        showProgressDialog()
 
         retrofitBuilder.WeatherApi.getWeatherData(latitude.toString(), longiude.toString(), key1)
             .enqueue(object : Callback<WeatherDataClass?> {
@@ -151,15 +217,20 @@ class MainActivity : BaseActivity() {
                         call: Call<WakiModel?>,
                         response: Response<WakiModel?>
                     ) {
-
+                        hideProgressDialog()
                         val responseBody = response.body()
 //                    if (responseBody?.status=="error"){
 //                        Toast.makeText(applicationContext,"Please Register With Other City", Toast.LENGTH_SHORT).show()
 //                    }
                         if (responseBody != null) {
+
+                            if (responseBody.data?.aqi == null) {
+                                binding.errorLayout.isVisible = true
+                                binding.mainLayout.isVisible = false
+                                return
+                            }
                             binding.aqiCircle.aqiTextView.text =
                                 responseBody.data?.aqi.toString()
-                            if (responseBody.data?.aqi == null) return
                             val airQuality = airQualityStatus(responseBody.data?.aqi!!)
 //                        var airQuality = 4
                             var level = ""
@@ -246,7 +317,8 @@ class MainActivity : BaseActivity() {
                             } else {
                                 level = "Good"
                                 precaution = ""
-                                warning = "Air quality is satisfactory, and air pollution poses little or no risk."
+                                warning =
+                                    "Air quality is satisfactory, and air pollution poses little or no risk."
                                 binding.aqiInfoCard.aqiInfoTitle.text = ""
                                 binding.aqiInfoCard.aqiInfoDesc.text = ""
                                 binding.attributionCard.attributionTextView.text = precaution
@@ -302,13 +374,16 @@ class MainActivity : BaseActivity() {
                                     "\n Warning : $warning" +
                                     "\n Precautions : $precaution"
                             Log.e("message", message)
-                            getACallingBg()
+                            binding.mainLayout.isVisible = true
                             binding.progressbar.visibility = View.INVISIBLE
+                            getACallingBg()
                         }
                     }
 
                     override fun onFailure(call: Call<WakiModel?>, t: Throwable) {
                         Log.e("waqi", t.message.toString())
+                        binding.mainLayout.isVisible = true
+                        binding.errorLayout.isVisible = false
                         binding.progressbar.visibility = View.INVISIBLE
                     }
                 })
@@ -316,69 +391,47 @@ class MainActivity : BaseActivity() {
         }, 500)
     }
 
-    fun getACallingBg() {
-        val constraints =
-            Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-        val data = Data.Builder()
-        data.putString("CITY", "geo:$latitude;$longiude")
-        val workRequest =
-            PeriodicWorkRequest.Builder(
-                BackgroundWorker::class.java,
-                15,
-                TimeUnit.MINUTES,
-                1,
-                TimeUnit.MINUTES
-            ).setInputData(data.build())
-                .setConstraints(constraints).build()
-        WorkManager.getInstance(this).enqueue(workRequest)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        //added for crash while getting location permission
+        Handler(Looper.getMainLooper()).postDelayed({
+            getLastKnownLocation()
+            getData()
+        }, 1200)
     }
 
-    fun airQualityStatus(aqi: Int): Int {
-        return if (aqi <= 50) {
-            1
-        } else if (aqi in 51..100) {
-            2
-        } else if (aqi in 101..150) {
-            3
-        } else if (aqi in 151..200) {
-            4
-        } else if (aqi in 201..250) {
-            5
-        } else if (aqi in 251..300) {
-            6
-        } else {
-            0
-        }
-    }
-
-    private fun fetchLocation() {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        val task = fusedLocationClient?.lastLocation
-        if (ActivityCompat.checkSelfPermission(
+    fun getLocationPermission() {
+        val REQUEST_LOCATION_PERMISSION = 1
+        if (ContextCompat.checkSelfPermission(
                 this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
-                101
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                REQUEST_LOCATION_PERMISSION
             )
-            return
         }
-        task?.addOnSuccessListener {
-            if (it != null) {
-//                checkGpsStatus()
-                latitude = it.latitude
-                longiude = it.longitude
-                Log.e("lat", latitude.toString())
-                Log.e("long", longiude.toString())
-                apiSendLocation = "geo:$latitude;$longiude"
+    }
+
+    @SuppressLint("MissingPermission")
+    fun getLastKnownLocation() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null)
+            .addOnSuccessListener { location ->
+                if (location != null) {
+                    val latitude = location.latitude
+                    val longitude = location.longitude
+                    Log.e("lat", latitude.toString())
+                    Log.e("long", longitude.toString())
+                    MainActivity.apiSendLocation = "geo:$latitude;$longitude"
+                }
             }
-        }
     }
 
 }

@@ -1,8 +1,14 @@
 package com.meet.airshield.activity
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.location.Location
+import android.location.LocationListener
 import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -10,11 +16,16 @@ import android.os.Build
 import android.os.Bundle
 import android.telephony.SmsManager
 import android.util.Log
+import android.view.Window
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.meet.airshield.R
+import com.meet.airshield.appHelper.AppHelper.emailId
+import com.meet.airshield.appHelper.AppHelper.phoneNumber
 import javax.mail.*
 import javax.mail.internet.AddressException
 import javax.mail.internet.InternetAddress
@@ -22,67 +33,43 @@ import javax.mail.internet.MimeMessage
 
 
 open class BaseActivity : AppCompatActivity() {
-    var isLogin: Boolean = false
-    var isRegistered: Boolean = false
-    var phoneNumber: String = ""
-    var password: String = ""
-    var emailId: String = ""
-    var city: String = ""
-    var fusedLocationClient: FusedLocationProviderClient? = null
+
     private lateinit var locationManager: LocationManager
     var gpsStatus = false
     var phoneNumberREgister = ""
     var senderMail = "meet.devstree@gmail.com"
     var senderMailPasword = "warszkyujnnnvews"
     var receiverMail = emailId
+    private var dialog: Dialog? = null
+    var latitude: Double = 0.00
+    var longiude: Double = 0.00
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-    }
-
-    fun saveData() {
-        val sharedPrefrances = getSharedPreferences("meet", Context.MODE_PRIVATE)
-        val editor = sharedPrefrances.edit()
-        editor.apply {
-            putBoolean("IS_REGISTER", isRegistered)
-            putBoolean("IS_LOGIN", isLogin)
-            putString("PASSWORD", password)
-            putString("PHONE_NUMBER", password)
-            putString("EMAIL_ID", emailId)
-            putString("CITY", city)
-        }.apply()
     }
 
     fun toastMe(messege: String) {
         Toast.makeText(this, messege, Toast.LENGTH_SHORT).show()
     }
 
-    fun loadData() {
-        val sharedPrefrances = getSharedPreferences("meet", Context.MODE_PRIVATE)
-        isRegistered = sharedPrefrances.getBoolean("IS_REGISTER", false)
-        isLogin = sharedPrefrances.getBoolean("IS_LOGIN", false)
-        password = sharedPrefrances.getString("PASSWORD", "").toString()
-        phoneNumber = sharedPrefrances.getString("PHONE_NUMBER", "").toString()
-        emailId = sharedPrefrances.getString("EMAIL_ID", "").toString()
-        city = sharedPrefrances.getString("CITY", "").toString()
-    }
-
     fun hasPermissions(context: Context, permissions: Array<String>): Boolean = permissions.all {
-        ActivityCompat.checkSelfPermission(context, it.toString()) == PackageManager.PERMISSION_GRANTED
+        ActivityCompat.checkSelfPermission(
+            context,
+            it
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
-    fun requestOtherPermissions(){
+    fun requestOtherPermissions(): Boolean {
         val PERMISSION_ALL = 1
         val PERMISSIONS = arrayOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS,
-            Manifest.permission.SEND_SMS,
+            Manifest.permission.SEND_SMS, Manifest.permission.POST_NOTIFICATIONS,
         )
 
         if (!hasPermissions(this, PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL)
+            return true
         }
+        return false
     }
 
     fun sendMail(message: String) {
@@ -130,7 +117,7 @@ open class BaseActivity : AppCompatActivity() {
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.POST_NOTIFICATIONS), 101
-                );
+                )
             }
         }
     }
@@ -151,18 +138,19 @@ open class BaseActivity : AppCompatActivity() {
     }
 
 
-    fun checkGpsStatus() {
-        locationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        gpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        if (gpsStatus) {
-            toastMe("GPS Is Enabled")
-        } else {
-            toastMe("GPS Is Not Enabled")
-        }
-    }
+//    fun checkGpsStatus() {
+//        locationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+//        gpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+//        if (gpsStatus) {
+//            toastMe("GPS Is Enabled")
+//        } else {
+//            toastMe("GPS Is Not Enabled")
+//        }
+//    }
 
     fun isOnline(): Boolean {
-        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val capabilities =
             connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
         if (capabilities != null) {
@@ -180,66 +168,25 @@ open class BaseActivity : AppCompatActivity() {
         return false
     }
 
-//    private fun sendNotification(current: LocalDateTime) {
-//        createDefaultChannel()
-//        val builder =
-//            NotificationCompat.Builder(context, CHANNEL_ID1)
-//                .setColor(ContextCompat.getColor(context, R.color.black))
-//                .setContentTitle(current.toString())
-//                .setContentText("water")
-//                .setSubText("Hello")
-//                .setPriority(NotificationCompat.PRIORITY_HIGH)
-//                .setSmallIcon(androidx.loader.R.drawable.notification_bg)
-//                .setAutoCancel(true)
-//        NotificationManagerCompat.from(context).notify(uniqueId, builder.build())
-//    }
+    fun showProgressDialog() {
+        if (dialog == null) {
+            dialog = Dialog(this@BaseActivity)
+            dialog!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            dialog!!.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog!!.setCancelable(false)
+            dialog!!.setCanceledOnTouchOutside(false)
+            dialog!!.setContentView(R.layout.layout_progress_dialog)
 
+        }
 
-//    private fun createDefaultChannel() {
-//        val context: Context = applicationContext
-//
-//        val sound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-//
-//        val attributes: AudioAttributes = AudioAttributes.Builder()
-//            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-//            .build()
-//
-//        val channel = NotificationChannel(
-//            CHANNEL_ID1,
-//            CHANNEL_NAME1,
-//            NotificationManager.IMPORTANCE_HIGH
-//        )
-//
-//        channel.setSound(sound, attributes)
-//        NotificationManagerCompat.from(context).createNotificationChannel(channel)
-//    }
+        if (dialog?.isShowing == false) dialog?.show()
+    }
 
-//    fun multipleReq(){
-//        lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
-//        var isReadPermissionGranted: Boolean = false
-//        var isnotificayioPermissionGranted: Boolean = false
-//
-//        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-//                isReadPermissionGranted = permissions[Manifest.permission.SEND_SMS] ?: isReadPermissionGranted
-//                isnotificayioPermissionGranted = permissions[Manifest.permission.POST_NOTIFICATIONS] ?: isReadPermissionGranted
-//            }
-//    }
+    fun hideProgressDialog() {
 
-    //    fun reqPremission() {
-//        isReadPermissionGranted = ContextCompat.checkSelfPermission(this,
-//            Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
-//        isnotificayioPermissionGranted = ContextCompat.checkSelfPermission(this,
-//            Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-//
-//        val permissionREq: MutableList<String> = ArrayList()
-//        if (!isReadPermissionGranted) {
-//            permissionREq.add(Manifest.permission.SEND_SMS)
-//        }
-//        if (!isReadPermissionGranted) {
-//            permissionREq.add(Manifest.permission.POST_NOTIFICATIONS)
-//        }
-//        if (permissionREq.isNotEmpty()) {
-//            permissionLauncher.launch(permissionREq.toTypedArray())
-//        }
-//    }
+        if (dialog != null) {
+            dialog!!.dismiss()
+        }
+
+    }
 }

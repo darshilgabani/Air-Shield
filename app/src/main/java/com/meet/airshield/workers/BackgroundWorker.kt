@@ -7,6 +7,7 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Handler
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -15,10 +16,16 @@ import androidx.work.WorkerParameters
 import com.example.unsplashdemo.retrofit.retrofitBuilder
 import com.meet.airshield.R
 import com.meet.airshield.activity.MainActivity
+import com.meet.airshield.appHelper.AppHelper.emailId
+import com.meet.airshield.appHelper.AppHelper.loadData
 import com.meet.airshield.model.WakiModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.mail.*
+import javax.mail.internet.AddressException
+import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeMessage
 
 
 class BackgroundWorker(private val context: Context, params: WorkerParameters) :
@@ -26,10 +33,22 @@ class BackgroundWorker(private val context: Context, params: WorkerParameters) :
     var uniqueId = 123
     private var CHANNEL_ID1 = "id"
     private var CHANNEL_NAME1 = "name"
+    var senderMail = "meet.devstree@gmail.com"
+    var senderMailPasword = "warszkyujnnnvews"
+    var receiverMail = emailId
+    var mail = "Air Quality"
+    private var saveClickCounter = 0
+
     override fun doWork(): Result {
         val city =  inputData.getString("CITY")
-        getData(city)
-        createDefaultChannel()
+        if (saveClickCounter++ == 0) {
+            loadData(applicationContext)
+            getData(city)
+            createDefaultChannel()
+            Handler().postDelayed({
+                saveClickCounter=0
+            },5000)
+        }
         return Result.success()
     }
 
@@ -156,7 +175,16 @@ class BackgroundWorker(private val context: Context, params: WorkerParameters) :
 
                         }
 
+                        mail = "HERE IS A AIR QUALITY DATA " +
+                                "\n" +
+                                "\n AQI : ${responseBody.data?.aqi.toString()} " +
+                                "\n Level : $level" + "\n" +
+                                "\n Warning : $warning" +
+                                "\n Precautions : $precaution"
+//                        Log.e("message", message)
+
                     }
+//                    sendMail(mail)
                     sendNotification(aqiLevel.toString(), level, precaution,warning)
                 }
 
@@ -166,6 +194,41 @@ class BackgroundWorker(private val context: Context, params: WorkerParameters) :
             })
 
 
+    }
+
+    fun sendMail(message: String) {
+        try {
+            val stringSenderEmail = senderMail
+            val stringReceiverEmail = receiverMail
+            val stringPasswordSenderEmail = senderMailPasword //"warszkyujnnnvews"
+            val stringHost = "smtp.gmail.com"
+            val properties = System.getProperties()
+            properties["mail.smtp.host"] = stringHost
+            properties["mail.smtp.port"] = "465"
+            properties["mail.smtp.ssl.enable"] = "true"
+            properties["mail.smtp.auth"] = "true"
+            val session = Session.getInstance(properties, object : Authenticator() {
+                override fun getPasswordAuthentication(): PasswordAuthentication {
+                    return PasswordAuthentication(stringSenderEmail, stringPasswordSenderEmail)
+                }
+            })
+            val mimeMessage = MimeMessage(session)
+            mimeMessage.addRecipient(Message.RecipientType.TO, InternetAddress(stringReceiverEmail))
+            mimeMessage.subject = "Subject: Air Quality Alert"
+            mimeMessage.setText(message)
+            val thread = Thread {
+                try {
+                    Transport.send(mimeMessage)
+                } catch (e: MessagingException) {
+                    e.printStackTrace()
+                }
+            }
+            thread.start()
+        } catch (e: AddressException) {
+            e.printStackTrace()
+        } catch (e: MessagingException) {
+            e.printStackTrace()
+        }
     }
 
     fun airQualityStatus(aqi: Int): Int {

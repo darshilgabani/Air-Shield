@@ -10,6 +10,7 @@ class LandingPageActivity : BaseActivity() {
         binding = ActivityLandingPageBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        getNotificationPermission()
         binding.btnSignUp.setOnClickListener {
             val intent = Intent(this, SignUpActivity::class.java)
             startActivity(intent)

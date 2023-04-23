@@ -14,6 +14,12 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.meet.airshield.R
+import com.meet.airshield.appHelper.AppHelper.emailId
+import com.meet.airshield.appHelper.AppHelper.isLogin
+import com.meet.airshield.appHelper.AppHelper.isRegistered
+import com.meet.airshield.appHelper.AppHelper.password
+import com.meet.airshield.appHelper.AppHelper.phoneNumber
+import com.meet.airshield.appHelper.AppHelper.saveData
 import com.meet.airshield.databinding.ActivitySignUpBinding
 import com.meet.airshield.utils.Utils
 
@@ -33,8 +39,7 @@ class SignUpActivity : BaseActivity() {
                 password = binding.edtTextPassRegister.text.toString()
                 phoneNumber = binding.edtPhoneNumberRegister.text.toString()
                 emailId = binding.edtEmailAddress.text.toString()
-                city = binding.edtCityRegister.selectedItem.toString()
-                saveData()
+                saveData(this)
                 Toast.makeText(this, "Registered Successfully", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, LoginActivity::class.java)
                 startActivity(intent)

@@ -41,7 +41,7 @@ android {
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -65,5 +65,11 @@ dependencies {
     implementation 'com.sun.mail:android-activation:1.6.7'
 
     //work manager
-    implementation "androidx.work:work-runtime-ktx:2.8.0"
+    implementation "androidx.work:work-runtime-ktx:2.8.1"
+
+    //location
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
+
+    // kotlin coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0'
 }
